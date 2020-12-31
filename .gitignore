@@ -3,3 +3,8 @@
 gradlew.bat
 gradlew
 gradle/**
+build
+bin
+.classpath
+.project
+.settings

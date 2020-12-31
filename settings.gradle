@@ -8,3 +8,7 @@ git {
     }
 }
 rootProject.name = 'java-instrumentation-template'
+include 'elasticsearch-2.x'
+include 'elasticsearch-5.x'
+include 'elasticsearch-6.x'
+include 'elasticsearch-7.3'
