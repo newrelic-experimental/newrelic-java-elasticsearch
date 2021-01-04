@@ -18,11 +18,11 @@ Restart the application
 ## Building
 
 > To build the ElasticSearch instrumenation jars requires that Gradle is installed.   
-Set the environment variable NEW_RELIC_EXTENSIONS_DIR to a local directory.  If building on the same machine as the application use the extensions directory of the New Relic Java Agent.
-To build one of the modules (e.g elasticsearch-5.x) use the following command:   
+Set the environment variable NEW_RELIC_EXTENSIONS_DIR to a local directory.  If building on the same machine as the application use the extensions directory of the New Relic Java Agent.   
+To build one of the modules (e.g elasticsearch-5.x) use the following command.   
 gradle elasticsearch-5.x:clean elasticsearch-5.x:install.  
    
-To build all of the instrumenation jars, use the following command:    
+To build all of the instrumenation jars, use the following command.    
 gradle clean install
 
 ## Support
