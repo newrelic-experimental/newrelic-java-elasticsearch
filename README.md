@@ -1,6 +1,6 @@
 [![New Relic Experimental header](https://github.com/newrelic/opensource-website/raw/master/src/images/categories/Experimental.png)](https://opensource.newrelic.com/oss-category/#new-relic-experimental)
 
-# ElasticSearch Instrumentation
+# New Relic Java Instrumentation for ElasticSearch
 
 >Instrumentation tracks and records ElasticSearch queries as DataStore queries
 
