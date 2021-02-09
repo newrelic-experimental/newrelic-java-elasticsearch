@@ -17,7 +17,7 @@ import com.newrelic.api.agent.weaver.Weaver;
 import com.nr.instrumentation.elasticsearch.ESQueryConverter;
 import com.nr.instrumentation.elasticsearch.ElasticSearchUtils;
 import com.nr.instrumentation.elasticsearch.ElasticSearchUtils.Holder;
-import com.nr.instrumentation.elasticsearch.ElasticUtils;
+import com.nr.instrumentation.elasticsearch.MessageHeaders;
 import com.nr.instrumentation.elasticsearch.NRHolder;
 
 @Weave(type=MatchType.BaseClass)
@@ -34,7 +34,8 @@ public abstract class AbstractClient {
 					port = remote.getPort();
 			}
 		}
-		request.putHeader(ElasticUtils.DISTRIBUTEDTRACINGNAME, NewRelic.getAgent().getTransaction().createDistributedTracePayload().text());
+		MessageHeaders header = new MessageHeaders(request);
+		NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(header);
 		Holder holder = ElasticSearchUtils.getAll(request);
 		DatastoreParameters params = null;
 		
