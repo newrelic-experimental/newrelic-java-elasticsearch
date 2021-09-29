@@ -1,10 +1,8 @@
 package com.nr.instrumentation.elasticsearch;
 
 import java.util.HashMap;
-import java.util.logging.Level;
 
 import com.newrelic.api.agent.DatastoreParameters;
-import com.newrelic.api.agent.NewRelic;
 import com.newrelic.api.agent.Segment;
 import com.newrelic.api.agent.Token;
 
