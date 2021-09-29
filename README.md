@@ -1,23 +1,39 @@
 [![New Relic Experimental header](https://github.com/newrelic/opensource-website/raw/master/src/images/categories/Experimental.png)](https://opensource.newrelic.com/oss-category/#new-relic-experimental)
+   
+![GitHub forks](https://img.shields.io/github/forks/newrelic-experimental/newrelic-java-elasticsearch?style=social)
+![GitHub stars](https://img.shields.io/github/stars/newrelic-experimental/newrelic-java-elasticsearch?style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/newrelic-experimental/newrelic-java-elasticsearch?style=social)
 
+![GitHub all releases](https://img.shields.io/github/downloads/newrelic-experimental/newrelic-java-elasticsearch/total)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/newrelic-experimental/newrelic-java-elasticsearch)
+![GitHub last commit](https://img.shields.io/github/last-commit/newrelic-experimental/newrelic-java-elasticsearch)
+![GitHub Release Date](https://img.shields.io/github/release-date/newrelic-experimental/newrelic-java-elasticsearch)
+
+
+![GitHub issues](https://img.shields.io/github/issues/newrelic-experimental/newrelic-java-elasticsearch)
+![GitHub issues closed](https://img.shields.io/github/issues-closed/newrelic-experimental/newrelic-java-elasticsearch)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/newrelic-experimental/newrelic-java-elasticsearch)
+![GitHub pull requests closed](https://img.shields.io/github/issues-pr-closed/newrelic-experimental/newrelic-java-elasticsearch)  
+   
 # New Relic Java Instrumentation for ElasticSearch
 
->Instrumentation tracks and records ElasticSearch queries as DataStore queries
+Instrumentation tracks and records ElasticSearch queries as DataStore queries
 
 ## Installation
 
-> Either download the Release instrumentation jars or build them as described in the Building section below.   
-In the New Relic Java Agent directory, create a directory named extensions if it does not already exist.   
-Copy the instrumentation jars into the extensions directory.   
-Restart the application
+1. Either download the Release instrumentation jars or build them as described in the Building section below.   
+2. In the New Relic Java Agent directory, create a directory named extensions if it does not already exist.   
+3. Copy the instrumentation jars into the extensions directory.   
+4. Restart the application
 
 ## Getting Started
 
-> You should see ElasticSearch queries begin to show up in the New Relic UI under Databases for the application.
+You should see ElasticSearch queries begin to show up in the New Relic UI under Databases for the application.
 
 ## Building
 
-> To build the ElasticSearch instrumenation jars requires that Gradle is installed.   
+To build the ElasticSearch instrumenation jars requires that Gradle is installed.   
+   
 Set the environment variable NEW_RELIC_EXTENSIONS_DIR to a local directory.  If building on the same machine as the application use the extensions directory of the New Relic Java Agent.   
 To build one of the modules (e.g elasticsearch-5.x) use the following command.   
 gradle elasticsearch-5.x:clean elasticsearch-5.x:install.  
