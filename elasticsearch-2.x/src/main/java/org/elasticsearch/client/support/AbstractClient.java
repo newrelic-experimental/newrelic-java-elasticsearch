@@ -1,5 +1,7 @@
 package org.elasticsearch.client.support;
 
+import java.util.HashMap;
+
 import org.elasticsearch.action.Action;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
@@ -19,6 +21,7 @@ import com.nr.instrumentation.elasticsearch.ElasticSearchUtils;
 import com.nr.instrumentation.elasticsearch.ElasticSearchUtils.Holder;
 import com.nr.instrumentation.elasticsearch.MessageHeaders;
 import com.nr.instrumentation.elasticsearch.NRHolder;
+import com.nr.instrumentation.elasticsearch.Utils;
 
 @Weave(type=MatchType.BaseClass)
 public abstract class AbstractClient {
@@ -34,10 +37,20 @@ public abstract class AbstractClient {
 					port = remote.getPort();
 			}
 		}
+		HashMap<String, Object> attributes = new HashMap<String, Object>();
+		Utils.addAttribute(attributes, "Host", host);
+		Utils.addAttribute(attributes, "Port", port);
+		Utils.addAttribute(attributes, "Action", action.name());
+		Utils.addActionRequest(attributes, request);
+
 		MessageHeaders header = new MessageHeaders(request);
 		NewRelic.getAgent().getTransaction().insertDistributedTraceHeaders(header);
 		Holder holder = ElasticSearchUtils.getAll(request);
+		Utils.addAttribute(attributes, "Query-Collection", holder.collection);
+		Utils.addAttribute(attributes, "Query-Operation", holder.operation);
+		NewRelic.getAgent().getTracedMethod().addCustomAttributes(attributes);
 		DatastoreParameters params = null;
+		
 		
 		if(host != null) {
 			params = DatastoreParameters.product("ElasticSearch").collection(holder.collection).operation(holder.operation).instance(host, port).noDatabaseName().slowQuery(holder.rawQuery, new ESQueryConverter()).build();
