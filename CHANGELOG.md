@@ -1,7 +1,8 @@
 ## Version: [v2.0.1](https://github.com/newrelic-experimental/newrelic-java-elasticsearch/releases/tag/v2.0.1) | Created: 2023-09-25
+
 ### Build Upgrades
-- Pdate build.gradle
 - Updated vendor title and added release workflow
+
 
 
 ## Installation
