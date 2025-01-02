@@ -22,7 +22,7 @@ jar {
 }
 
 verifyInstrumentation {
-	passes 'org.elasticsearch.client:transport:[2.0.0,5.0.0)'
+	passes 'org.elasticsearch:elasticsearch:[2.3.0,5.0.0)'
 	excludeRegex '.*SNAPSHOT'
 	excludeRegex '.*alpha.*'
 	excludeRegex '.*beta.*'
