@@ -55,4 +55,17 @@ public class Utils {
     addRequestAttributes(attributes, request);
     NewRelic.getAgent().getTracedMethod().addCustomAttributes(attributes);
   }
+
+  public static String extractIndex(String input) {
+    if (input == null || input.isEmpty()) {
+      return "noindex"; // or throw an exception based on your use case
+    }
+
+    int underscoreIndex = input.indexOf('_');
+    if (underscoreIndex == -1) {
+      return "noindex"; // or handle the case where there's no underscore
+    }
+
+    return input.substring(0, underscoreIndex);
+  }
 }
