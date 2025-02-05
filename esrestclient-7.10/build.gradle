@@ -1,11 +1,14 @@
 
-// Build.gradle generated for instrumentation module elasticsearch-7.3
+// Build.gradle generated for instrumentation module esrestclient-7.10
 
 apply plugin: 'java'
 
 dependencies {
-implementation 'org.elasticsearch.client:transport:7.3.0'
-implementation 'org.elasticsearch.client:elasticsearch-rest-client:7.10.0'
+   // Declare a dependency on each JAR you want to instrument
+   // Example:
+   // implementation 'javax.servlet:servlet-api:2.5'
+
+   implementation 'org.elasticsearch.client:elasticsearch-rest-client:7.10.0'
 
    // New Relic Labs Java Agent dependencies
    implementation 'com.newrelic.agent.java:newrelic-agent:6.4.0'
@@ -15,18 +18,18 @@ implementation 'org.elasticsearch.client:elasticsearch-rest-client:7.10.0'
 
 jar {
   manifest {
-    attributes 'Implementation-Title': 'com.newrelic.instrumentation.labs.elasticsearch-7.3'
+    attributes 'Implementation-Title': 'com.newrelic.instrumentation.labs.esrestclient-7.10'
     attributes 'Implementation-Vendor': 'New Relic Labs'
     attributes 'Implementation-Vendor-Id': 'com.newrelic.labs'
     attributes 'Implementation-Version': 1.0
   }
 }
 
+
 verifyInstrumentation {
-	passes 'org.elasticsearch:elasticsearch:[7.3.0,7.14.0)'
+	passes 'org.elasticsearch.client:elasticsearch-rest-client:[7.10.0,)'
 	excludeRegex '.*SNAPSHOT'
 	excludeRegex '.*alpha.*'
 	excludeRegex '.*beta.*'
 	excludeRegex '.*rc[1-9].*'
 }
-
