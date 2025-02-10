@@ -1,9 +1,12 @@
 package com.newrelic.instrumentation.labs.esrestclient;
 
+import java.util.logging.Level;
+
 import org.elasticsearch.client.Cancellable;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.ResponseListener;
+
 import com.newrelic.api.agent.DatastoreParameters;
 import com.newrelic.api.agent.NewRelic;
 import com.newrelic.api.agent.Segment;
@@ -11,82 +14,114 @@ import com.newrelic.api.agent.Trace;
 import com.newrelic.api.agent.weaver.Weave;
 import com.newrelic.api.agent.weaver.Weaver;
 
-
 @Weave(originalName = "org.elasticsearch.client.RestClient")
 public abstract class RestClient_Instrumentation {
 
-  @Trace(dispatcher = true)
-  public Response performRequest(Request request) {
-    // Start a segment for the synchronous request
-    Segment segment = NewRelic.getAgent().getTransaction().startSegment("ElasticsearchRequest",
-        request.getMethod());
+    @Trace(dispatcher = true)
+    public Response performRequest(Request request) {
+        Segment segment = NewRelic.getAgent()
+                .getTransaction()
+                .startSegment("ElasticsearchRequest", request.getMethod());
+        String payload = null;
+        String endPoint = request.getEndpoint();
 
-    try {
-      Utils.logRequestAttributes(request);
+        try {
+            Utils.logRequestAttributes(request);
 
-      String endPoint = request.getEndpoint();
+            if (Utils.isPayloadApplicable(request.getMethod())) {
+                payload = Utils.getPayloadSafely(request);
+            }
 
+            // Utils.logPayload(payload);
 
-      if (endPoint != null && !endPoint.isEmpty()) {
-        NewRelic.getAgent().getTracedMethod().setMetricName("Custom", "ES", "RestClient",
-            getClass().getSimpleName(), "performRequest", endPoint);
-      } else {
-        NewRelic.getAgent().getTracedMethod().setMetricName("Custom", "ES", "RestClient",
-            getClass().getSimpleName(), "performRequest");
-      }
-      // Log the request as a database call
+            if (endPoint != null && !endPoint.isEmpty()) {
+                NewRelic.getAgent()
+                        .getTracedMethod()
+                        .setMetricName("Custom", "ES", "RestClient", getClass().getSimpleName(), "performRequestAsync",
+                                endPoint);
+            } else {
+                NewRelic.getAgent()
+                        .getTracedMethod()
+                        .setMetricName("Custom", "ES", "RestClient", getClass().getSimpleName(), "performRequestAsync");
+            }
 
-      segment.reportAsExternal(DatastoreParameters.product("Elasticsearch")
-          .collection(Utils.extractIndex(request.getEndpoint())).operation(request.getMethod())
-          .noInstance().noDatabaseName().slowQuery(endPoint, new ESQueryConverter()).build());
+            String sql = Utils.constructSql(endPoint, payload);
 
-      // Call the original method
-      return Weaver.callOriginal();
-    } finally {
-      // End the segment
-      segment.end();
+            segment.reportAsExternal(DatastoreParameters.product("Elasticsearch")
+                    .collection(Utils.extractIndex(endPoint))
+                    .operation(request.getMethod())
+                    .noInstance()
+                    .noDatabaseName()
+                    .slowQuery(sql, new ESQueryConverter())
+                    .build());
+
+            return Weaver.callOriginal();
+        } finally {
+            segment.end();
+        }
     }
-  }
 
-  @Trace(dispatcher = true)
-  public Cancellable performRequestAsync(Request request, ResponseListener responseListener) {
-    // Start a segment for the asynchronous request
-    Segment segment = NewRelic.getAgent().getTransaction().startSegment("ElasticsearchRequestAsync",
-        request.getMethod());
+    @Trace(dispatcher = true)
 
-    try {
-      // Add custom attributes for better traceability
-      Utils.logRequestAttributes(request);
+    public Cancellable performRequestAsync(Request request, ResponseListener responseListener) {
+        // Start a segment for the asynchronous request
+        Segment segment = NewRelic.getAgent()
+                .getTransaction()
+                .startSegment("ElasticsearchRequestAsync", request.getMethod());
 
-      String endPoint = request.getEndpoint();
+        try {
+            // Log request attributes for traceability
+            Utils.logRequestAttributes(request);
 
+            // Determine if payload logging is applicable
+            String payload = null;
+            if (Utils.isPayloadApplicable(request.getMethod())) {
+                payload = Utils.getPayloadSafely(request);
+            }
 
-      if (endPoint != null && !endPoint.isEmpty()) {
-        NewRelic.getAgent().getTracedMethod().setMetricName("Custom", "ES", "RestClient",
-            getClass().getSimpleName(), "performRequestAsync", endPoint);
-      } else {
-        NewRelic.getAgent().getTracedMethod().setMetricName("Custom", "ES", "RestClient",
-            getClass().getSimpleName(), "performRequestAsync");
-      }
+            // Log the payload
+            // Utils.logPayload(payload);
 
-      DatastoreParameters params = DatastoreParameters.product("Elasticsearch")
-          .collection(Utils.extractIndex(request.getEndpoint())).operation(request.getMethod())
-          .noInstance().noDatabaseName().slowQuery(endPoint, new ESQueryConverter()).build();
+            // Set metric name for the transaction
+            String endPoint = request.getEndpoint();
+            if (endPoint != null && !endPoint.isEmpty()) {
+                NewRelic.getAgent()
+                        .getTracedMethod()
+                        .setMetricName("Custom", "ES", "RestClient", getClass().getSimpleName(), "performRequestAsync",
+                                endPoint);
+            } else {
+                NewRelic.getAgent()
+                        .getTracedMethod()
+                        .setMetricName("Custom", "ES", "RestClient", getClass().getSimpleName(), "performRequestAsync");
+            }
 
-      // Log the request as a database call
-      int hash = responseListener.hashCode();
+            // Construct SQL-like query for slow query logging
+            String sql = Utils.constructSql(endPoint, payload);
 
-      NRHolder.putParams(hash, params);
-      NRHolder.putSegment(hash, segment);
-      NRHolder.putToken(hash, NewRelic.getAgent().getTransaction().getToken());
+            // Create datastore parameters for the request
+            DatastoreParameters params = DatastoreParameters.product("Elasticsearch")
+                    .collection(Utils.extractIndex(endPoint))
+                    .operation(request.getMethod())
+                    .noInstance()
+                    .noDatabaseName()
+                    .slowQuery(sql, new ESQueryConverter())
+                    .build();
 
+            // Store parameters for asynchronous processing
+            int hash = responseListener.hashCode();
+            NRHolder.putParams(hash, params);
+            NRHolder.putSegment(hash, segment);
+            NRHolder.putToken(hash, NewRelic.getAgent().getTransaction().getToken());
 
-      // Call the original method with the wrapped listener
-      return Weaver.callOriginal();
-    } catch (Exception e) {
-      // Ensure segment is ended in case of an exception
-      segment.end();
-      throw e;
+            // Call the original method with the wrapped listener
+            return Weaver.callOriginal();
+        } catch (Exception e) {
+            // Ensure segment is ended in case of an exception before async call
+            segment.end();
+            NewRelic.getAgent().getLogger().log(Level.FINER, "Exception performRequestAsync: " + e.getMessage());
+            throw e;
+        }
+
     }
-  }
+
 }
