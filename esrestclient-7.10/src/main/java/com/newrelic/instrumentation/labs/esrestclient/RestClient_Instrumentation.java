@@ -55,6 +55,11 @@ public abstract class RestClient_Instrumentation {
                     .slowQuery(sql, new ESQueryConverter())
                     .build());
 
+            if (null != sql) {
+                // Utils.logPayload(sql);
+                Utils.logSqlQueryAttributes(segment, sql, 4091); // SQL Truncation
+            }
+
             return Weaver.callOriginal();
         } finally {
             segment.end();
