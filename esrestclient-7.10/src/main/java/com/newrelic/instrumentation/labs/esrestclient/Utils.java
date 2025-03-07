@@ -13,6 +13,7 @@ import org.elasticsearch.client.Request;
 
 import com.newrelic.api.agent.DatastoreParameters;
 import com.newrelic.api.agent.NewRelic;
+import com.newrelic.api.agent.Segment;
 
 public class Utils {
 
@@ -60,6 +61,25 @@ public class Utils {
         Map<String, Object> attributes = new HashMap<>();
         addRequestAttributes(attributes, request);
         NewRelic.getAgent().getTracedMethod().addCustomAttributes(attributes);
+    }
+
+    public static void logSqlQueryAttributes(Segment segment, String sqlQuery, int size) {
+        Map<String, Object> attributes = new HashMap<>();
+
+        // Break the SQL query into parts if it exceeds the specified size
+        int queryLength = sqlQuery.length();
+        int partNumber = 1;
+        if (queryLength > size) {
+            for (int i = 0; i < queryLength; i += size) {
+                int end = Math.min(i + size, queryLength);
+                String queryPart = sqlQuery.substring(i, end);
+                attributes.put("query_part_" + partNumber, queryPart);
+                partNumber++;
+            }
+
+            // Add the custom attributes to the traced method
+            segment.addCustomAttributes(attributes);
+        }
     }
 
     public static String extractIndex(String input) {
