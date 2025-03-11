@@ -37,12 +37,12 @@ public abstract class RestClient_Instrumentation {
             if (endPoint != null && !endPoint.isEmpty()) {
                 NewRelic.getAgent()
                         .getTracedMethod()
-                        .setMetricName("Custom", "ES", "RestClient", getClass().getSimpleName(), "performRequestAsync",
+                        .setMetricName("Custom", "ES", "RestClient", getClass().getSimpleName(), "performRequest",
                                 endPoint);
             } else {
                 NewRelic.getAgent()
                         .getTracedMethod()
-                        .setMetricName("Custom", "ES", "RestClient", getClass().getSimpleName(), "performRequestAsync");
+                        .setMetricName("Custom", "ES", "RestClient", getClass().getSimpleName(), "performRequest");
             }
 
             String sql = Utils.constructSql(endPoint, payload);
@@ -111,6 +111,11 @@ public abstract class RestClient_Instrumentation {
                     .noDatabaseName()
                     .slowQuery(sql, new ESQueryConverter())
                     .build();
+
+            if (null != sql) {
+                // Utils.logPayload(sql);
+                Utils.logSqlQueryAttributes(segment, sql, 4091); // SQL Truncation
+            }
 
             // Store parameters for asynchronous processing
             int hash = responseListener.hashCode();
