@@ -73,7 +73,9 @@ public class Utils {
             for (int i = 0; i < queryLength; i += size) {
                 int end = Math.min(i + size, queryLength);
                 String queryPart = sqlQuery.substring(i, end);
-                attributes.put("query_part_" + partNumber, queryPart);
+                // Format the part number with leading zeros
+                String partKey = String.format("query_part_%02d", partNumber);
+                attributes.put(partKey, queryPart);
                 partNumber++;
             }
 
