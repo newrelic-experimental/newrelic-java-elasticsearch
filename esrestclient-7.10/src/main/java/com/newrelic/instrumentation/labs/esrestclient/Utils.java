@@ -70,11 +70,11 @@ public class Utils {
         int queryLength = sqlQuery.length();
         int partNumber = 1;
         if (queryLength > size) {
-            for (int i = 0; i < queryLength; i += size) {
+            for (int i = 0; (i < queryLength && partNumber < 200); i += size) {
                 int end = Math.min(i + size, queryLength);
                 String queryPart = sqlQuery.substring(i, end);
                 // Format the part number with leading zeros
-                String partKey = String.format("query_part_%02d", partNumber);
+                String partKey = String.format("query_part_%03d", partNumber);
                 attributes.put(partKey, queryPart);
                 partNumber++;
             }
