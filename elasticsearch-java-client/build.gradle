@@ -5,7 +5,7 @@ apply plugin: 'java'
 
 dependencies {
 // https://mvnrepository.com/artifact/co.elastic.clients/elasticsearch-java
-implementation group: 'co.elastic.clients', name: 'elasticsearch-java', version: '7.15.0'
+implementation 'co.elastic.clients:elasticsearch-java:7.15.0'
 
    // New Relic Labs Java Agent dependencies
    implementation 'com.newrelic.agent.java:newrelic-agent:6.4.0'
@@ -23,6 +23,7 @@ jar {
 }
 
 verifyInstrumentation {
+  passes 'co.elastic.clients:elasticsearch-java:[7.15.0,7.16.0)'
   // Verifier plugin documentation:
   // https://github.com/newrelic/newrelic-gradle-verify-instrumentation
   // Example:

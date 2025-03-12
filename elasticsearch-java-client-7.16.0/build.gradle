@@ -1,0 +1,32 @@
+
+// Build.gradle generated for instrumentation module elasticsearch-java-client
+
+apply plugin: 'java'
+
+dependencies {
+// https://mvnrepository.com/artifact/co.elastic.clients/elasticsearch-java
+implementation 'co.elastic.clients:elasticsearch-java:7.16.0'
+
+   // New Relic Labs Java Agent dependencies
+   implementation 'com.newrelic.agent.java:newrelic-agent:6.4.0'
+   implementation 'com.newrelic.agent.java:newrelic-api:6.4.0'
+   implementation fileTree(include: ['*.jar'], dir: '../libs')
+}
+
+jar {
+  manifest {
+    attributes 'Implementation-Title': 'com.newrelic.instrumentation.labs.elasticsearch-java-client-7.16.0'
+    attributes 'Implementation-Vendor': 'New Relic Labs'
+    attributes 'Implementation-Vendor-Id': 'com.newrelic.labs'
+    attributes 'Implementation-Version': 1.0
+  }
+}
+
+verifyInstrumentation {
+  passes 'co.elastic.clients:elasticsearch-java:[7.16.0,7.17.20)'
+  // Verifier plugin documentation:
+  // https://github.com/newrelic/newrelic-gradle-verify-instrumentation
+  // Example:
+  // passes 'javax.servlet:servlet-api:[2.2,2.5]'
+  // exclude 'javax.servlet:servlet-api:2.4.public_draft'
+}
