@@ -68,9 +68,9 @@ public class Utils {
 
         // Break the SQL query into parts if it exceeds the specified size
         int queryLength = sqlQuery.length();
-        int partNumber = 1;
+        int partNumber = 2;
         if (queryLength > size) {
-            for (int i = 0; (i < queryLength && partNumber < 200); i += size) {
+            for (int i = 0; (i < queryLength && partNumber < 64); i += size) {
                 int end = Math.min(i + size, queryLength);
                 String queryPart = sqlQuery.substring(i, end);
                 // Format the part number with leading zeros
