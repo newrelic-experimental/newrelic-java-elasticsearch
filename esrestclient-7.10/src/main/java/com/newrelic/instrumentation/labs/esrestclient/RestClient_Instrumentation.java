@@ -46,19 +46,29 @@ public abstract class RestClient_Instrumentation {
             }
 
             String sql = Utils.constructSql(endPoint, payload);
+            String queryToSend = sql;
 
+            if (null != sql) {
+
+                int sqlLength = sql.length();
+                String queryPart = "";
+
+                if (sqlLength > 4094) {
+
+                    queryPart = sql.substring(0, 4093);
+                    queryToSend = queryPart;
+                    // Utils.logPayload(sql);
+                    Utils.logSqlQueryAttributes(segment, sql.substring(4093), 255); // SQL Truncation
+                }
+
+            }
             segment.reportAsExternal(DatastoreParameters.product("Elasticsearch")
                     .collection(Utils.extractIndex(endPoint))
                     .operation(request.getMethod())
                     .noInstance()
                     .noDatabaseName()
-                    .slowQuery(sql, new ESQueryConverter())
+                    .slowQuery(queryToSend, new ESQueryConverter())
                     .build());
-
-            if (null != sql) {
-                // Utils.logPayload(sql);
-                Utils.logSqlQueryAttributes(segment, sql, 4091); // SQL Truncation
-            }
 
             return Weaver.callOriginal();
         } finally {
@@ -102,20 +112,30 @@ public abstract class RestClient_Instrumentation {
 
             // Construct SQL-like query for slow query logging
             String sql = Utils.constructSql(endPoint, payload);
+            String queryToSend = sql;
 
+            if (null != sql) {
+
+                int sqlLength = sql.length();
+                String queryPart = "";
+
+                if (sqlLength > 4094) {
+
+                    queryPart = sql.substring(0, 4093);
+                    queryToSend = queryPart;
+                    // Utils.logPayload(sql);
+                    Utils.logSqlQueryAttributes(segment, sql.substring(4093), 255); // SQL Truncation
+                }
+
+            }
             // Create datastore parameters for the request
             DatastoreParameters params = DatastoreParameters.product("Elasticsearch")
                     .collection(Utils.extractIndex(endPoint))
                     .operation(request.getMethod())
                     .noInstance()
                     .noDatabaseName()
-                    .slowQuery(sql, new ESQueryConverter())
+                    .slowQuery(queryToSend, new ESQueryConverter())
                     .build();
-
-            if (null != sql) {
-                // Utils.logPayload(sql);
-                Utils.logSqlQueryAttributes(segment, sql, 4091); // SQL Truncation
-            }
 
             // Store parameters for asynchronous processing
             int hash = responseListener.hashCode();
