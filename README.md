@@ -30,6 +30,88 @@ Instrumentation tracks and records ElasticSearch queries as DataStore queries
 
 You should see ElasticSearch queries begin to show up in the New Relic UI under Databases for the application.
 
+## Long Query Support with Logs in Context
+
+This instrumentation automatically logs complete Elasticsearch queries to New Relic Logs with full trace correlation, overcoming the attribute size limitations for large queries.
+
+### Required Configuration
+
+To enable logs in context for Elasticsearch queries, ensure the following is set in your `newrelic.yml`:
+
+```yaml
+application_logging:
+  enabled: true
+  forwarding:
+    enabled: true
+    context_data:
+      enabled: true  # Required for trace correlation
+```
+
+### Optional Configuration
+
+The following settings have sensible defaults and are optional:
+
+```yaml
+# Enable/disable logs in context for long queries (default: true)
+elasticsearch.query.logs_in_context.enabled: true
+
+# Threshold for logging queries in characters (default: 4093)
+elasticsearch.query.logs_in_context.threshold: 4093
+
+# Enable/disable query splitting into custom attributes (default: true)
+# REST client only - maintains backward compatibility
+elasticsearch.query.split_attributes.enabled: true
+```
+
+### How It Works
+
+**For queries ≤ 4093 characters:**
+- Full query visible in transaction trace (no chunking or logging overhead)
+
+**For queries > 4093 characters:**
+
+**REST Client (esrestclient-7.10):**
+- First 4093 chars in main query field
+- Remaining query split into 255-char chunks as custom attributes (`query_part_002` through `query_part_063`)
+- Complete query logged to New Relic Logs with trace correlation
+- **Max attributes capacity:** ~19.8KB
+- **Max logs capacity:** Unlimited
+
+**Transport Client (elasticsearch-2.x through 7.14):**
+- Full query passed to `slowQuery()` (truncated by agent at 4093 chars)
+- Complete query logged to New Relic Logs with trace correlation
+
+### Configuration Scenarios
+
+#### Default (Backward Compatible)
+No configuration needed. Both attributes and logs enabled:
+- ✅ Custom attributes for queries up to ~19.8KB
+- ✅ Complete queries in logs (unlimited size)
+- **Best for:** Maximum visibility and backward compatibility
+
+#### Logs Only (Avoid Attribute Limits)
+```yaml
+elasticsearch.query.split_attributes.enabled: false
+```
+- ❌ No custom attribute chunks
+- ✅ Complete queries in logs only
+- **Best for:** Very long queries (>19.8KB) hitting attribute count limits
+
+#### Attributes Only (Original Behavior)
+```yaml
+elasticsearch.query.logs_in_context.enabled: false
+```
+- ✅ Custom attribute chunks (up to ~19.8KB)
+- ❌ No logs
+- **Best for:** Customers who prefer attributes over logs
+
+### Viewing Complete Queries
+
+1. Navigate to APM → Transactions in New Relic
+2. Select a transaction with a long Elasticsearch query
+3. Click the **"Logs"** tab to see the complete query
+4. Logs are automatically correlated with trace context
+
 ## Building
 
 To build the ElasticSearch instrumenation jars requires that Gradle is installed.   

@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpEntity;
 import org.elasticsearch.client.Request;
@@ -138,5 +140,94 @@ public class Utils {
             return endpoint + " \n" + payload;
         }
         return endpoint;
+    }
+
+    private static final Logger ELASTICSEARCH_QUERY_LOGGER = Logger.getLogger("com.newrelic.instrumentation.elasticsearch");
+
+    // Configuration keys
+    private static final String CONFIG_LOGS_ENABLED = "elasticsearch.query.logs_in_context.enabled";
+    private static final String CONFIG_LOG_THRESHOLD = "elasticsearch.query.logs_in_context.threshold";
+    private static final String CONFIG_SPLIT_ATTRIBUTES_ENABLED = "elasticsearch.query.split_attributes.enabled";
+
+    // Default values
+    private static final int DEFAULT_LOG_THRESHOLD = 4093;
+    private static Boolean logsInContextEnabled = null;
+    private static Integer logThreshold = null;
+    private static Boolean splitAttributesEnabled = null;
+
+    /**
+     * Check if logs in context is enabled for Elasticsearch queries.
+     * Configuration key: elasticsearch.query.logs_in_context.enabled
+     * Default: true
+     */
+    private static boolean isLogsInContextEnabled() {
+        if (logsInContextEnabled == null) {
+            logsInContextEnabled = NewRelic.getAgent().getConfig().getValue(CONFIG_LOGS_ENABLED, Boolean.TRUE);
+        }
+        return logsInContextEnabled;
+    }
+
+    /**
+     * Get the threshold for logging queries (in characters).
+     * Configuration key: elasticsearch.query.logs_in_context.threshold
+     * Default: 4093
+     */
+    private static int getLogThreshold() {
+        if (logThreshold == null) {
+            logThreshold = NewRelic.getAgent().getConfig().getValue(CONFIG_LOG_THRESHOLD, DEFAULT_LOG_THRESHOLD);
+        }
+        return logThreshold;
+    }
+
+    /**
+     * Check if query splitting into attributes is enabled.
+     * Configuration key: elasticsearch.query.split_attributes.enabled
+     * Default: true
+     */
+    public static boolean isSplitAttributesEnabled() {
+        if (splitAttributesEnabled == null) {
+            splitAttributesEnabled = NewRelic.getAgent().getConfig().getValue(CONFIG_SPLIT_ATTRIBUTES_ENABLED, Boolean.TRUE);
+        }
+        return splitAttributesEnabled;
+    }
+
+    /**
+     * Log complete query to New Relic Logs when it exceeds the truncation limit.
+     * This provides full query visibility via logs in context.
+     * The New Relic agent will automatically forward these logs with trace context.
+     *
+     * Configuration:
+     *   elasticsearch.query.logs_in_context.enabled (default: true)
+     *   elasticsearch.query.logs_in_context.threshold (default: 4093)
+     *   elasticsearch.query.split_attributes.enabled (default: true)
+     */
+    public static void logCompleteQueryToLogs(String fullQuery, String endpoint, String method) {
+        // Check if feature is enabled
+        if (!isLogsInContextEnabled()) {
+            return;
+        }
+
+        // Check if query exceeds threshold
+        if (fullQuery == null || fullQuery.length() <= getLogThreshold()) {
+            return;
+        }
+
+        try {
+            // Log the complete query using java.util.logging
+            // New Relic agent automatically forwards java.util.logging logs with trace context
+            String logMessage = String.format(
+                "Elasticsearch Long Query | endpoint=%s | method=%s | length=%d | query=%s",
+                endpoint != null ? endpoint : "unknown",
+                method != null ? method : "unknown",
+                fullQuery.length(),
+                fullQuery
+            );
+
+            ELASTICSEARCH_QUERY_LOGGER.log(Level.INFO, logMessage);
+
+        } catch (Exception e) {
+            // Don't fail the transaction if logging fails
+            NewRelic.getAgent().getLogger().log(Level.WARNING, "Failed to log complete Elasticsearch query: " + e.getMessage());
+        }
     }
 }

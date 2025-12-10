@@ -46,7 +46,10 @@ public abstract class AbstractClient {
 		Utils.addAttribute(attributes, "Query-Collection", holder.collection);
 		Utils.addAttribute(attributes, "Query-Operation", holder.operation);
 		NewRelic.getAgent().getTracedMethod().addCustomAttributes(attributes);
-		
+
+		// Log complete query to New Relic Logs for full visibility
+		Utils.logCompleteQueryToLogs(holder.rawQuery, holder.collection, holder.operation);
+
 		if(host != null) {
 			params = DatastoreParameters.product("ElasticSearch").collection(holder.collection).operation(holder.operation).instance(host, port).noDatabaseName().slowQuery(holder.rawQuery, new ESQueryConverter()).build();
 		} else {
