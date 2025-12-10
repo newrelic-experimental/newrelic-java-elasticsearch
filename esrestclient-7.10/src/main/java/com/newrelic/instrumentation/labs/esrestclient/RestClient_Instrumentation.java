@@ -58,7 +58,14 @@ public abstract class RestClient_Instrumentation {
                     queryPart = sql.substring(0, 4093);
                     queryToSend = queryPart;
                     // Utils.logPayload(sql);
-                    Utils.logSqlQueryAttributes(segment, sql.substring(4093), 255); // SQL Truncation
+
+                    // Split query into attribute chunks if enabled (default: true)
+                    if (Utils.isSplitAttributesEnabled()) {
+                        Utils.logSqlQueryAttributes(segment, sql.substring(4093), 255); // SQL Truncation
+                    }
+
+                    // Log complete query to New Relic Logs for full visibility
+                    Utils.logCompleteQueryToLogs(sql, endPoint, request.getMethod());
                 }
 
             }
@@ -124,7 +131,14 @@ public abstract class RestClient_Instrumentation {
                     queryPart = sql.substring(0, 4093);
                     queryToSend = queryPart;
                     // Utils.logPayload(sql);
-                    Utils.logSqlQueryAttributes(segment, sql.substring(4093), 255); // SQL Truncation
+
+                    // Split query into attribute chunks if enabled (default: true)
+                    if (Utils.isSplitAttributesEnabled()) {
+                        Utils.logSqlQueryAttributes(segment, sql.substring(4093), 255); // SQL Truncation
+                    }
+
+                    // Log complete query to New Relic Logs for full visibility
+                    Utils.logCompleteQueryToLogs(sql, endPoint, request.getMethod());
                 }
 
             }
