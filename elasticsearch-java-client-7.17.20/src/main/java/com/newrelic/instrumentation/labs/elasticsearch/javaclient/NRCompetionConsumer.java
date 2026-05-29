@@ -1,5 +1,6 @@
 package com.newrelic.instrumentation.labs.elasticsearch.javaclient;
 
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 import com.newrelic.api.agent.DatastoreParameters;
@@ -10,10 +11,12 @@ public class NRCompetionConsumer<T> implements BiConsumer<T, Throwable> {
 	
 	private Segment segment = null;
 	private DatastoreParameters params = null;
+	private Map<String,Object> attributes = null;
 	
-	public NRCompetionConsumer(String segmentName, DatastoreParameters p) {
+	public NRCompetionConsumer(String segmentName, DatastoreParameters p, Map<String, Object> attrs) {
 		segment = NewRelic.getAgent().getTransaction().startSegment(segmentName);
 		params = p;
+		attributes = attrs;
 	}
 
 	@Override
@@ -22,6 +25,9 @@ public class NRCompetionConsumer<T> implements BiConsumer<T, Throwable> {
 			if(segment != null) {
 				if(params != null) {
 					segment.reportAsExternal(params);
+				}
+				if(attributes != null && !attributes.isEmpty()) {
+					segment.addCustomAttributes(attributes);
 				}
 				segment.end();
 				segment = null;
@@ -35,5 +41,18 @@ public class NRCompetionConsumer<T> implements BiConsumer<T, Throwable> {
 		}
 	}
 
+	public Segment getSegment() {
+		return segment;
+	}
+
+	public DatastoreParameters getParams() {
+		return params;
+	}
+
+	public Map<String, Object> getAttributes() {
+		return attributes;
+	}
+
+	
 
 }
