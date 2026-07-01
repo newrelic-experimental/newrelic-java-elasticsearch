@@ -1,5 +1,5 @@
 
-// Build.gradle generated for instrumentation module elasticsearch-5.x
+// Build.gradle generated for instrumentation module elasticsearch-5.3
 
 apply plugin: 'java'
 
@@ -7,9 +7,10 @@ dependencies {
    implementation 'org.elasticsearch.client:transport:5.3.0'
 
    // New Relic Labs Java Agent dependencies
-   implementation 'com.newrelic.agent.java:newrelic-agent:6.4.0'
-   implementation 'com.newrelic.agent.java:newrelic-api:6.4.0'
-   implementation fileTree(include: ['*.jar'], dir: '../libs')
+   implementation 'com.newrelic.agent.java:newrelic-agent:' + project.findProperty('java.agent.version')
+   implementation 'com.newrelic.agent.java:newrelic-api:' + project.findProperty('java.agent.version')
+   implementation 'com.newrelic.agent.java:agent-bridge:' + project.findProperty('java.agent.version')
+   implementation fileTree(include: ['*.jar'], dir: '../test-lib')
 }
 
 jar {
@@ -22,9 +23,9 @@ jar {
 }
 
 verifyInstrumentation {
-	passes 'org.elasticsearch.client:transport:[5.3.0,6.0.0)'
-	excludeRegex '.*SNAPSHOT'
-	excludeRegex '.*alpha.*'
-	excludeRegex '.*beta.*'
-	excludeRegex '.*rc[1-9].*'
+  passesOnly 'org.elasticsearch.client:transport:[5.3.0,6.0.0)'
+  excludeRegex '.*SNAPSHOT'
+  excludeRegex '.*alpha.*'
+  excludeRegex '.*beta.*'
+  excludeRegex '.*rc[1-9].*'
 }

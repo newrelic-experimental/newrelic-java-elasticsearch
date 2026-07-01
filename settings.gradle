@@ -1,4 +1,4 @@
-rootProject.name = 'java-instrumentation-template'
+rootProject.name = 'elasticsearch-instrumentation'
 include 'elasticsearch-2.x'
 include 'elasticsearch-5.0'
 include 'elasticsearch-5.3'
