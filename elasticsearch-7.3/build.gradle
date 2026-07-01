@@ -4,13 +4,14 @@
 apply plugin: 'java'
 
 dependencies {
-implementation 'org.elasticsearch.client:transport:7.3.0'
-implementation 'org.elasticsearch.client:elasticsearch-rest-client:7.10.0'
+   implementation 'org.elasticsearch.client:transport:7.3.0'
+   implementation 'org.elasticsearch.client:elasticsearch-rest-client:7.10.0'
 
    // New Relic Labs Java Agent dependencies
-   implementation 'com.newrelic.agent.java:newrelic-agent:6.4.0'
-   implementation 'com.newrelic.agent.java:newrelic-api:6.4.0'
-   implementation fileTree(include: ['*.jar'], dir: '../libs')
+   implementation 'com.newrelic.agent.java:newrelic-agent:' + project.findProperty('java.agent.version')
+   implementation 'com.newrelic.agent.java:newrelic-api:' + project.findProperty('java.agent.version')
+   implementation 'com.newrelic.agent.java:agent-bridge:' + project.findProperty('java.agent.version')
+   implementation fileTree(include: ['*.jar'], dir: '../test-lib')
 }
 
 jar {
@@ -23,10 +24,9 @@ jar {
 }
 
 verifyInstrumentation {
-	passes 'org.elasticsearch:elasticsearch:[7.3.0,7.14.0)'
-	excludeRegex '.*SNAPSHOT'
-	excludeRegex '.*alpha.*'
-	excludeRegex '.*beta.*'
-	excludeRegex '.*rc[1-9].*'
+  passesOnly 'org.elasticsearch:elasticsearch:[7.3.0,7.14.0)'
+  excludeRegex '.*SNAPSHOT'
+  excludeRegex '.*alpha.*'
+  excludeRegex '.*beta.*'
+  excludeRegex '.*rc[1-9].*'
 }
-
